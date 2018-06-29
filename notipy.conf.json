@@ -1,0 +1,12 @@
+{
+  "broker_url": "amqp://kilobyte:lolcats123@localhost:5672/test",
+  "name": "email",
+  "connector_class": "rabbit",
+  "callback_url": "http://localhost:8000/notipy/callback",
+  "medium": "email",
+  "service": "SparkPost",
+  "http_call_url": "https://api.sparkpost.com/api/v1/transmissions",
+  "http_headers": {"Authorization": "ec77d525193a9dfd5fabfc69a65183af58f5a20d"},
+  "consumer_python": "/home/kilobyte/env/pyNotifications/bin/python",
+  "log_directory": "/var/log/pyNotifications/email"
+}
