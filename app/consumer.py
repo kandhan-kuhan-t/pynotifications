@@ -14,7 +14,7 @@ class Consumer:
     """
     def __init__(
             self, url: str, queue_name: str, connector_cls: Type[app.connector.Connector],
-            process_task_function: Callable
+            process_task_function: Callable, call_on_success: bool, call_on_failure: bool
     ):
         self.connection_mgr = connector_cls(url=url, queue_name=queue_name)
         self.connection_mgr.setup_connection()
@@ -28,6 +28,8 @@ class Consumer:
         self.failed_tasks_connection_mgr = connector_cls(url=url, queue_name=f"{queue_name}_failed")
         self.failed_tasks_connection_mgr.setup_connection()
         self.deserialized_data = None
+        self.call_on_success = call_on_success
+        self.call_on_failure = call_on_failure
         logger.info("consumer created")
 
     def start(self):
@@ -79,19 +81,23 @@ class Consumer:
             logger.exception(f'callback failed to {url} with data: {data} %s', e, exc_info=1)
 
     def success_callback(self):
-        self.callback(data=self.callback_data, url=self.success_callback_url)
+        if self.call_on_success:
+            self.callback(data=self.callback_data, url=self.success_callback_url)
 
     def failure_callback(self, e):
-        self.callback(data=self.callback_data, url=self.failure_callback_url)
+        if self.call_on_failure:
+            self.callback(data=self.callback_data, url=self.failure_callback_url)
 
     def acknowledge(self):
         raise NotImplementedError()
 
     def on_success(self):
+        logger.info(f"job succeeded")
         for hook in self.on_success_hooks:
             hook()
 
     def on_failure(self, e):
+        logger.info(f"job failed")
         for hook in self.on_failure_hooks:
             hook(e)
 

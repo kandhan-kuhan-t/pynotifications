@@ -13,13 +13,16 @@ class Medium:
             broker_url: str,
             http_call_url: str,
             http_headers: Dict,
+            call_on_success: bool,
+            call_on_failure: bool,
             content_type_is_json: bool=True,
-            schema=None
+            schema=None,
     ):
         if not issubclass(consumer_class, app_types.ConsumerImplementation):
             raise Exception()
         self.consumer: app.consumer.Consumer = consumer_class(
-            url=broker_url, queue_name=queue_name, process_task_function=self.send
+            url=broker_url, queue_name=queue_name, process_task_function=self.send,
+            call_on_success=call_on_success, call_on_failure=call_on_failure
         )
         self.schema = schema
         self.request_parameters_schema = Schema(

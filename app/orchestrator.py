@@ -21,7 +21,9 @@ def read_data_from_conf_file():
             "service": data["service"],
             "http_call_url": data["http_call_url"],
             "http_headers": data["http_headers"],
-            "consumer_python": data["consumer_python"]
+            "consumer_python": data["consumer_python"],
+            "call_on_success": data["call_on_success"],
+            "call_on_failure": data["call_on_failure"],
         }
 
 
@@ -33,7 +35,12 @@ def run_consumer(conf):
     command = f"{conf['consumer_python']} {cur_dir}/run_consumer.py " \
               f"{conf['medium']} {conf['service']} {conf['broker_url']} {conf['name']}"
     last_arg = json.dumps(
-        dict(http_call_url=conf.get('http_call_url'), http_headers=conf.get('http_headers'))
+        dict(
+            http_call_url=conf.get('http_call_url'),
+            http_headers=conf.get('http_headers'),
+            call_on_success=conf.get('call_on_success'),
+            call_on_failure=conf.get('call_on_failure')
+        )
     )
     p = subprocess.Popen(
         [*command.split(' '), last_arg, '&'],
