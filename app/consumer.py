@@ -4,6 +4,7 @@ from app import utilities
 import app.exceptions
 from logging import getLogger
 
+
 logger = getLogger("local")
 
 
@@ -18,12 +19,15 @@ class Consumer:
         self.connection_mgr = connector_cls(url=url, queue_name=queue_name)
         self.connection_mgr.setup_connection()
         self.on_success_hooks = [self.success_callback]
-        self.on_failure_hooks = [self.failure_callback]
+        self.on_failure_hooks = [self.failure_callback, self.push_to_failed_queue]
         self._internal_call_data: Dict = {}
         self.success_callback_url: str = None
         self.failure_callback_url: str = None
         self.callback_data: Dict = None
         self.process_task_function: Callable = process_task_function
+        self.failed_tasks_connection_mgr = connector_cls(url=url, queue_name=f"{queue_name}_failed")
+        self.failed_tasks_connection_mgr.setup_connection()
+        self.deserialized_data = None
         logger.info("consumer created")
 
     def start(self):
@@ -48,6 +52,7 @@ class Consumer:
 
     def call_process_task_with_deserialized_data(self, *args, **kwargs):
         data: Dict = self.deserialize_data(*args, **kwargs)
+        self.deserialized_data = data
         self.success_callback_url = data["success_callback_url"]
         self.failure_callback_url = data["failure_callback_url"]
         self.callback_data = data["callback_data"]
@@ -89,3 +94,7 @@ class Consumer:
     def on_failure(self, e):
         for hook in self.on_failure_hooks:
             hook(e)
+
+    def push_to_failed_queue(self, e):
+        logger.info(f"pushed job to failed queue, error: {e}")
+        self.failed_tasks_connection_mgr.push_to_queue(self.deserialized_data)

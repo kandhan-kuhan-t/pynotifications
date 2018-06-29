@@ -18,6 +18,4 @@ producer.send(
 
 import time
 
-
-while True:
-    time.sleep(1)
+time.sleep(3)

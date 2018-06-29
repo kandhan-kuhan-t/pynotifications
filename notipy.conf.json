@@ -3,6 +3,8 @@
   "name": "email",
   "connector_class": "rabbit",
   "callback_url": "http://localhost:8000/notipy/callback",
+  "call_on_success": false,
+  "call_on_failure": false,
   "medium": "email",
   "service": "SparkPost",
   "http_call_url": "https://api.sparkpost.com/api/v1/transmissions",
