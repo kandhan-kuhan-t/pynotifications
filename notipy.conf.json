@@ -1,6 +1,6 @@
 {
   "broker_url": "amqp://kilobyte:lolcats123@localhost:5672/test",
-  "name": "email",
+  "name": "django_dev_email",
   "connector_class": "rabbit",
   "callback_url": "http://localhost:8000/notipy/callback",
   "call_on_success": false,
